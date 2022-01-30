@@ -17,9 +17,8 @@ pub fn find_all_todo_lines(source: &Vec<String>) -> Vec<usize> {
     source
         .iter()
         .enumerate()
-        .filter(|(_, line)| TODO_EXPR.is_match(line))
-        .unzip::<usize, &String, Vec<usize>, Vec<_>>()
-        .0
+        .filter_map(|(row, line)| TODO_EXPR.is_match(line).then(|| row))
+        .collect()
 }
 
 pub fn sort_todos_by_priority(todos: &mut Vec<(usize, String)>) {
