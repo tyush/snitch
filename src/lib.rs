@@ -39,14 +39,8 @@ pub fn find_files(path: &Path) -> Vec<DirEntry> {
     WalkDir::new(path)
         .into_iter()
         .filter_map(|f| {
-            if let Ok(entry) = f {
-                if let Ok(m) = entry.metadata() {
-                    if m.is_file() {
-                        return Some(entry)
-                    }
-                }
-            };
-            None
+            let entry = f.ok()?;
+            entry.metadata().ok()?.is_file().then(|| entry)
         })
         .collect()
 }
