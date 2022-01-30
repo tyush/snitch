@@ -4,7 +4,7 @@ use std::{
     fmt::Display,
     fs::read_to_string,
     path::{Path, PathBuf},
-    usize::MIN, cmp::Reverse,
+    usize::MIN,
 };
 use walkdir::{DirEntry, WalkDir};
 
@@ -21,9 +21,10 @@ pub fn find_all_todo_lines(source: &Vec<String>) -> Vec<usize> {
         .collect()
 }
 
-pub fn sort_todos_by_priority(todos: &mut Vec<(usize, String)>) {
-    todos.sort_by_cached_key(|(_, a)| Reverse(measure_priority(a)));
+pub fn sort_todos_by_priority(todos: &mut Vec<Todo>) {
+    todos.sort_by_cached_key(|a| measure_priority(&a.message));
     // swap b/a to sort descending
+    // actually, don't reverse. this way, highest priority is closest to bottom of screen
 }
 
 pub fn measure_priority(s: &str) -> usize {
@@ -44,7 +45,7 @@ pub fn find_files(path: &Path) -> Vec<DirEntry> {
         .collect()
 }
 
-struct Todo {
+pub struct Todo {
     message: String,
     file: String,
     line: usize,
@@ -113,11 +114,13 @@ pub fn scan(path: String) -> Result<(), Box<dyn Error>> {
         }
     }
 
+    let mut todos_per_file = todos_per_file.into_iter().flatten().collect();
+    sort_todos_by_priority(&mut todos_per_file);
+
     println!(
         "{}",
         todos_per_file
             .iter()
-            .flatten()
             .map(|t| format!("{}", t) + "\n")
             .collect::<String>()
     );
@@ -127,7 +130,7 @@ pub fn scan(path: String) -> Result<(), Box<dyn Error>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{find_all_todo_lines, sort_todos_by_priority};
+    use crate::{find_all_todo_lines, sort_todos_by_priority, Todo, measure_priority};
 
     #[test]
     fn finds_todos_in_text() {
@@ -147,8 +150,6 @@ mod tests {
 
     #[test]
     fn measure_priority_test() {
-        // todo: *haha irony* find out why this function requires an import but others don't
-        use crate::measure_priority;
         assert_eq!(measure_priority("// TODO: fdjsafdasfda"), 4);
         assert_eq!(
             measure_priority("// ToDooOOo: Find A BetTer CaPiTalIZaTion SysTem"),
@@ -162,16 +163,31 @@ mod tests {
 
     #[test]
     fn does_sort_todos_by_priority() {
-        let mut todos: Vec<(usize, String)> = vec![
-            (42, "// TODO: move this to line 43".to_owned()),
-            (63, "// TODOOOOOOOOOOOO: move this to line 42".to_owned()),
-            (12, "// TODOOO: fire whoever made our program file size affect runtime".to_owned())
+        let mut todos: Vec<Todo> = vec![
+            Todo {
+                file: "test_file.rs".to_owned(),
+                col: 1,
+                line: 12,
+                message: "// todooo: fjdklas".to_owned()
+            },
+            Todo {
+                file: "test_file.rs".to_owned(),
+                col: 1,
+                line: 63,
+                message: "// todo: fdjskalfhdjasklfhjdasklf".to_owned()
+            },
+            Todo {
+                file: "test_file.rs".to_owned(),
+                col: 1,
+                line: 42,
+                message: "// todooooooo: fdjsal;fdddd".to_owned()
+            },
         ];
         sort_todos_by_priority(&mut todos);
 
-        assert_eq!(todos[0].0, 63);
-        assert_eq!(todos[1].0, 12);
-        assert_eq!(todos[2].0, 42);
+        assert_eq!(todos[0].line, 63);
+        assert_eq!(todos[1].line, 12);
+        assert_eq!(todos[2].line, 42);
     }
 
     // todo: find a way to test find_files reliably (maybe /test/ dir?)
