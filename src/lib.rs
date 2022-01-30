@@ -9,7 +9,7 @@ use std::{
 use walkdir::{DirEntry, WalkDir};
 
 lazy_static::lazy_static! {
-    static ref TODO_EXPR: Regex = RegexBuilder::new(r"^\s*(\S+\s)todo*:? (.*)$").case_insensitive(true).build().unwrap();
+    static ref TODO_EXPR: Regex = RegexBuilder::new(r"^\s*(\S+\s)todo*: (.*)$").case_insensitive(true).build().unwrap();
     static ref TODO_PRI_EXPR: Regex = RegexBuilder::new(r"todo+").case_insensitive(true).build().unwrap();
 }
 
