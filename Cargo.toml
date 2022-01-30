@@ -1,0 +1,16 @@
+[package]
+name = "snitch"
+version = "0.1.0"
+edition = "2021"
+authors = ["Yash Kumar <tyushk+git@gmail.com>"]
+description = "tsoding/snitch, RIIR'd."
+license = "MIT OR Apache-2.0"
+categories = ["command-line-utilities"]
+keywords = ["todo", "fixme"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1.5"
+lazy_static = "1.4"
+walkdir = "2.3"
