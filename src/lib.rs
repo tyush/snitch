@@ -71,9 +71,9 @@ impl Display for Todo {
 pub fn scan(path: String) -> Result<(), Box<dyn Error>> {
     let files = find_files(Path::new(&path));
 
-    let files: Vec<Box<PathBuf>> = files
+    let files: Vec<PathBuf> = files
         .iter()
-        .map(|f| Box::new(f.path().to_owned()))
+        .map(|f| f.path().to_owned())
         .collect();
 
     let mut cant_read: Vec<String> = vec![];
