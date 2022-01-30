@@ -4,7 +4,7 @@ use std::{
     fmt::Display,
     fs::read_to_string,
     path::{Path, PathBuf},
-    usize::MIN,
+    usize::MIN, cmp::Reverse,
 };
 use walkdir::{DirEntry, WalkDir};
 
@@ -23,7 +23,7 @@ pub fn find_all_todo_lines(source: &Vec<String>) -> Vec<usize> {
 }
 
 pub fn sort_todos_by_priority(todos: &mut Vec<(usize, String)>) {
-    todos.sort_by(|(_, a), (_, b)| measure_priority(b).cmp(&measure_priority(a)));
+    todos.sort_by_cached_key(|(_, a)| Reverse(measure_priority(a)));
     // swap b/a to sort descending
 }
 
